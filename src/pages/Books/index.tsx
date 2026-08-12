@@ -4,6 +4,9 @@ import api from '../../services/api';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../components/Toast';
+import { ConfirmModal } from '../../components/ConfirmModal';
+import { SkeletonCard } from '../../components/Skeleton';
 import styles from './Books.module.css';
 
 interface Livro {
@@ -22,9 +25,10 @@ interface Livro {
 
 export const Books: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [livros, setLivros] = useState<Livro[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLivro, setSelectedLivro] = useState<Livro | null>(null);
@@ -116,7 +120,7 @@ export const Books: React.FC = () => {
       fetchLivros();
     } catch (error: any) {
       console.error("Erro ao salvar livro:", error);
-      alert("Erro ao salvar livro. Verifique os dados.");
+      showToast(error.response?.data?.message || "Erro ao salvar livro. Verifique os dados.", 'error');
     }
   };
 
@@ -147,14 +151,15 @@ export const Books: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja deletar este livro?')) {
-      try {
-        await api.delete(`/livros/${id}`);
-        fetchLivros();
-      } catch (error) {
-        console.error("Erro ao deletar livro:", error);
-        alert("Erro ao deletar. O livro pode estar emprestado ou reservado.");
-      }
+    try {
+      await api.delete(`/livros/${id}`);
+      fetchLivros();
+      showToast('Livro removido com sucesso.', 'success');
+    } catch (error) {
+      console.error("Erro ao deletar livro:", error);
+      showToast('Erro ao deletar. O livro pode estar emprestado ou reservado.', 'error');
+    } finally {
+      setConfirmDeleteId(null);
     }
   };
 
@@ -172,9 +177,21 @@ export const Books: React.FC = () => {
         )}
       </div>
 
+      <ConfirmModal
+        isOpen={confirmDeleteId !== null}
+        title="Deletar Livro"
+        message="Tem certeza que deseja remover este livro do acervo? Esta ação não pode ser desfeita."
+        confirmLabel="Deletar"
+        danger
+        onConfirm={() => confirmDeleteId && handleDelete(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
+
       <div className={`glass-panel ${styles.tableContainer}`}>
         {loading ? (
-          <div className={styles.loading}>Carregando acervo...</div>
+          <div className={styles.booksGrid}>
+            {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
         ) : livros.length === 0 ? (
           <div className={styles.emptyState}>
             <BookOpen size={48} color="var(--border-color)" />
@@ -217,7 +234,7 @@ export const Books: React.FC = () => {
                           className={styles.deleteBtn}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(livro.id);
+                            setConfirmDeleteId(livro.id);
                           }}
                           title="Deletar Livro"
                         >

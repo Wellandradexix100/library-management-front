@@ -4,6 +4,9 @@ import api from '../../services/api';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../components/Toast';
+import { ConfirmModal } from '../../components/ConfirmModal';
+import { SkeletonRow } from '../../components/Skeleton';
 import styles from './Authors.module.css';
 
 interface Autor {
@@ -14,10 +17,12 @@ interface Autor {
 
 export const Authors: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [autores, setAutores] = useState<Autor[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nome, setNome] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAutores();
@@ -43,18 +48,19 @@ export const Authors: React.FC = () => {
       setNome('');
       fetchAutores();
     } catch (error: any) {
-      alert(error.response?.data?.message || "Erro ao adicionar autor.");
+      showToast(error.response?.data?.message || "Erro ao adicionar autor.", 'error');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja deletar este autor? Ele não pode ter livros vinculados.')) {
-      try {
-        await api.delete(`/autor/${id}`);
-        fetchAutores();
-      } catch (error: any) {
-        alert(error.response?.data?.message || "Erro ao deletar. Verifique se o autor possui livros.");
-      }
+    try {
+      await api.delete(`/autor/${id}`);
+      fetchAutores();
+      showToast('Autor removido com sucesso.', 'success');
+    } catch (error: any) {
+      showToast(error.response?.data?.message || "Erro ao deletar. Verifique se o autor possui livros.", 'error');
+    } finally {
+      setConfirmDeleteId(null);
     }
   };
 
@@ -72,9 +78,26 @@ export const Authors: React.FC = () => {
         )}
       </div>
 
+      <ConfirmModal
+        isOpen={confirmDeleteId !== null}
+        title="Deletar Autor"
+        message="Tem certeza que deseja deletar este autor? Ele não pode ter livros vinculados."
+        confirmLabel="Deletar"
+        danger
+        onConfirm={() => confirmDeleteId && handleDelete(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
+
       <div className={`glass-panel ${styles.tableContainer}`}>
         {loading ? (
-          <div className={styles.loading}>Carregando autores...</div>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>ID</th><th>Nome do Autor</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+            </tbody>
+          </table>
         ) : autores.length === 0 ? (
           <div className={styles.emptyState}>
             <Users size={48} color="var(--border-color)" />
@@ -98,7 +121,7 @@ export const Authors: React.FC = () => {
                     {(user?.role === 'ADMIN' || user?.role === 'BIBLIOTECARIO') && (
                       <button 
                         className={styles.deleteBtn}
-                        onClick={() => handleDelete(autor.id)}
+                        onClick={() => setConfirmDeleteId(autor.id)}
                         title="Deletar Autor"
                       >
                         <Trash2 size={18} />

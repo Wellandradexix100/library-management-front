@@ -5,7 +5,7 @@ import api from '../services/api';
 export type Role = 'ADMIN' | 'USER' | 'BIBLIOTECARIO';
 
 interface UserPayload {
-  id: number;
+  id: string;
   email: string;
   funcao: Role;
   role?: Role;

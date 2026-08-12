@@ -4,6 +4,9 @@ import api from '../../services/api';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../components/Toast';
+import { ConfirmModal } from '../../components/ConfirmModal';
+import { SkeletonRow } from '../../components/Skeleton';
 import styles from '../Loans/Loans.module.css';
 
 interface Reserva {
@@ -18,6 +21,7 @@ interface Reserva {
 
 export const Reservations: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,6 +30,8 @@ export const Reservations: React.FC = () => {
   const [livroBusca, setLivroBusca] = useState('');
   const [usuarioBusca, setUsuarioBusca] = useState('');
   const [dataExpiracao, setDataExpiracao] = useState('');
+  const [confirmEfetivarId, setConfirmEfetivarId] = useState<string | null>(null);
+  const [confirmCancelarId, setConfirmCancelarId] = useState<string | null>(null);
 
 
   const [livrosDisponiveis, setLivrosDisponiveis] = useState<any[]>([]);
@@ -69,11 +75,11 @@ export const Reservations: React.FC = () => {
       const selectedUser = usuarios.find(u => u.nome === usuarioBusca || u.id === usuarioBusca);
 
       if (!selectedLivro) {
-        alert("Livro não encontrado. Verifique o nome ou bip o código novamente.");
+        showToast("Livro não encontrado. Verifique o nome ou bip o código novamente.", 'warning');
         return;
       }
       if (!selectedUser) {
-        alert("Usuário não encontrado. Verifique o nome ou bip a carteirinha novamente.");
+        showToast("Usuário não encontrado. Verifique o nome ou bip a carteirinha novamente.", 'warning');
         return;
       }
 
@@ -90,29 +96,31 @@ export const Reservations: React.FC = () => {
       fetchDadosBusca();
     } catch (error: any) {
       console.error("Erro ao registrar reserva:", error);
-      alert(error.response?.data?.message || "Erro ao registrar reserva.");
+      showToast(error.response?.data?.message || "Erro ao registrar reserva.", 'error');
     }
   };
 
   const handleEfetivar = async (id: string) => {
-    if (window.confirm('Efetivar reserva (transformar em empréstimo ativo)?')) {
-      try {
-        await api.post(`/reservas/${id}/efetivar`);
-        fetchReservas();
-      } catch (error: any) {
-        alert(error.response?.data?.message || "Erro ao efetivar.");
-      }
+    try {
+      await api.post(`/reservas/${id}/efetivar`);
+      fetchReservas();
+      showToast('Reserva efetivada como empréstimo.', 'success');
+    } catch (error: any) {
+      showToast(error.response?.data?.message || "Erro ao efetivar.", 'error');
+    } finally {
+      setConfirmEfetivarId(null);
     }
   };
 
   const handleCancelar = async (id: string) => {
-    if (window.confirm('Deseja realmente cancelar esta reserva?')) {
-      try {
-        await api.delete(`/reservas/${id}/cancelar`);
-        fetchReservas();
-      } catch (error: any) {
-        alert(error.response?.data?.message || "Erro ao cancelar.");
-      }
+    try {
+      await api.delete(`/reservas/${id}/cancelar`);
+      fetchReservas();
+      showToast('Reserva cancelada com sucesso.', 'success');
+    } catch (error: any) {
+      showToast(error.response?.data?.message || "Erro ao cancelar.", 'error');
+    } finally {
+      setConfirmCancelarId(null);
     }
   };
 
@@ -134,9 +142,36 @@ export const Reservations: React.FC = () => {
         </Button>
       </div>
 
+      <ConfirmModal
+        isOpen={confirmEfetivarId !== null}
+        title="Efetivar Reserva"
+        message="Deseja transformar esta reserva em um empréstimo ativo?"
+        confirmLabel="Efetivar"
+        onConfirm={() => confirmEfetivarId && handleEfetivar(confirmEfetivarId)}
+        onCancel={() => setConfirmEfetivarId(null)}
+      />
+      <ConfirmModal
+        isOpen={confirmCancelarId !== null}
+        title="Cancelar Reserva"
+        message="Deseja realmente cancelar esta reserva? O livro voltara ao estoque."
+        confirmLabel="Cancelar Reserva"
+        danger
+        onConfirm={() => confirmCancelarId && handleCancelar(confirmCancelarId)}
+        onCancel={() => setConfirmCancelarId(null)}
+      />
+
       <div className={`glass-panel ${styles.tableContainer}`}>
         {loading ? (
-          <div className={styles.loading}>Carregando reservas...</div>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Livro</th><th>Aluno/Usuário</th><th>Data da Reserva</th><th>Status</th><th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+            </tbody>
+          </table>
         ) : reservas.length === 0 ? (
           <div className={styles.emptyState}>
             <BookOpen size={48} color="var(--border-color)" />
@@ -180,7 +215,7 @@ export const Reservations: React.FC = () => {
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button 
                           className={styles.returnBtn}
-                          onClick={() => handleEfetivar(res.id)}
+                          onClick={() => setConfirmEfetivarId(res.id)}
                           title="Efetivar (Emprestar)"
                         >
                           <CheckCircle size={18} /> Efetivar
@@ -188,7 +223,7 @@ export const Reservations: React.FC = () => {
                         <button 
                           className={styles.returnBtn}
                           style={{ color: '#ef4444', borderColor: '#fee2e2' }}
-                          onClick={() => handleCancelar(res.id)}
+                          onClick={() => setConfirmCancelarId(res.id)}
                           title="Cancelar Reserva"
                         >
                           <XCircle size={18} />

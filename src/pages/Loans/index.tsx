@@ -4,6 +4,9 @@ import api from '../../services/api';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../components/Toast';
+import { ConfirmModal } from '../../components/ConfirmModal';
+import { SkeletonRow } from '../../components/Skeleton';
 import styles from './Loans.module.css';
 
 interface Emprestimo {
@@ -18,6 +21,7 @@ interface Emprestimo {
 
 export const Loans: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +35,7 @@ export const Loans: React.FC = () => {
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [pendingLoanData, setPendingLoanData] = useState<any>(null);
   const [warningStudentName, setWarningStudentName] = useState('');
+  const [confirmReturnId, setConfirmReturnId] = useState<string | null>(null);
 
 
   const [livrosDisponiveis, setLivrosDisponiveis] = useState<any[]>([]);
@@ -74,11 +79,11 @@ export const Loans: React.FC = () => {
       const selectedUser = usuarios.find(u => u.nome === usuarioBusca || u.id === usuarioBusca);
 
       if (!selectedLivro) {
-        alert("Livro não encontrado. Verifique o nome ou bip o código novamente.");
+        showToast("Livro não encontrado. Verifique o nome ou bip o código novamente.", 'warning');
         return;
       }
       if (!selectedUser) {
-        alert("Usuário não encontrado. Verifique o nome ou bip a carteirinha novamente.");
+        showToast("Usuário não encontrado. Verifique o nome ou bip a carteirinha novamente.", 'warning');
         return;
       }
 
@@ -115,19 +120,20 @@ export const Loans: React.FC = () => {
       fetchDadosBusca();
     } catch (error: any) {
       console.error("Erro ao registrar empréstimo:", error);
-      alert(error.response?.data?.message || "Erro ao registrar empréstimo.");
+      showToast(error.response?.data?.message || "Erro ao registrar empréstimo.", 'error');
     }
   };
 
   const handleReturn = async (id: string) => {
-    if (window.confirm('Confirmar a devolução deste livro?')) {
-      try {
-        await api.put(`/emprestimo/${id}`);
-        fetchEmprestimos();
-      } catch (error: any) {
-        console.error("Erro ao devolver livro:", error);
-        alert(error.response?.data?.message || "Erro ao realizar devolução.");
-      }
+    try {
+      await api.put(`/emprestimo/${id}`);
+      fetchEmprestimos();
+      showToast('Devolução registrada com sucesso.', 'success');
+    } catch (error: any) {
+      console.error("Erro ao devolver livro:", error);
+      showToast(error.response?.data?.message || "Erro ao realizar devolução.", 'error');
+    } finally {
+      setConfirmReturnId(null);
     }
   };
 
@@ -145,9 +151,27 @@ export const Loans: React.FC = () => {
         )}
       </div>
 
+      <ConfirmModal
+        isOpen={confirmReturnId !== null}
+        title="Confirmar Devolução"
+        message="Deseja registrar a devolução deste livro?"
+        confirmLabel="Registrar Devolução"
+        onConfirm={() => confirmReturnId && handleReturn(confirmReturnId)}
+        onCancel={() => setConfirmReturnId(null)}
+      />
+
       <div className={`glass-panel ${styles.tableContainer}`}>
         {loading ? (
-          <div className={styles.loading}>Carregando registros...</div>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Livro</th><th>Aluno/Usuário</th><th>Data Empréstimo</th><th>Status</th><th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+            </tbody>
+          </table>
         ) : emprestimos.length === 0 ? (
           <div className={styles.emptyState}>
             <FileText size={48} color="var(--border-color)" />
@@ -196,7 +220,7 @@ export const Loans: React.FC = () => {
                     {!emp.dataDevolucao && (user?.role === 'ADMIN' || user?.role === 'BIBLIOTECARIO') && (
                       <button 
                         className={styles.returnBtn}
-                        onClick={() => handleReturn(emp.id)}
+                        onClick={() => setConfirmReturnId(emp.id)}
                         title="Registrar Devolução"
                       >
                         <CheckCircle size={18} /> Devolver

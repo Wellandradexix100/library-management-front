@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { type ReactElement } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { Login } from './pages/Login';
@@ -11,7 +12,7 @@ import { Students } from './pages/Students';
 import { OverdueLoans } from './pages/OverdueLoans';
 import './index.css';
 
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+const PrivateRoute = ({ children }: { children: ReactElement }) => {
   const { isAuthenticated, loading } = useAuth();
   
   if (loading) return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Carregando...</div>;

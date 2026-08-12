@@ -1,6 +1,13 @@
 # 📚 Library Management - Frontend
 
-Interface de usuário (SPA) do Sistema de Gerenciamento de Biblioteca, construída com **React**, **Vite** e **TypeScript**.
+Interface de usuário (SPA) completa para Sistema de Gerenciamento de Biblioteca, construída com **React**, **Vite** e **TypeScript**.
+
+## 📸 Funcionalidades
+- **Gestão de Acervo:** Painéis completos para visualização, cadastro, e edição de livros, autores e usuários.
+- **Geração de Códigos:** Criação dinâmica de código de barras e QR Codes para facilitar a identificação e *bipagem* de exemplares.
+- **Controle Operacional:** Mesas virtuais interativas para gerenciar empréstimos e efetivar ou cancelar reservas.
+- **Dashboard Analítico:** Visão geral com métricas da biblioteca.
+- **Experiência do Usuário (UX):** Feedbacks em tempo real com Toast notifications, modais de confirmação customizados e Skeleton Loaders em todas as tabelas e grids.
 
 ## 🚀 Tecnologias
 
@@ -10,6 +17,8 @@ Interface de usuário (SPA) do Sistema de Gerenciamento de Biblioteca, construí
 - **React Router DOM** (Roteamento de páginas)
 - **Axios** (Comunicação HTTP com a API REST)
 - **Lucide React** (Ícones minimalistas e consistentes)
+- **Skeletons Loading** (Feedback visual com shimmer effect nativo durante chamadas assíncronas)
+- **Toast Notifications & Confirm Modals** (Sistema customizado para feedback de UI, substituindo `alert` e `window.confirm`)
 - **React Barcode & React QR Code** (Geração de códigos para identificação dos livros)
 
 ## 📦 Como Executar Localmente
@@ -45,4 +54,4 @@ npm run dev
 - Roteamento, formulários e chamadas assíncronas tipadas, espelhando os mesmos contratos e esquemas (`Zod`) definidos na API do back-end.
 
 ---
-Este é um subprojeto que faz parte do repositório principal do Sistema de Gerenciamento de Biblioteca Full-Stack.
+Feito com 💙 para fins de estudo e portfólio de desenvolvimento.

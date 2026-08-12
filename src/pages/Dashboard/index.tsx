@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { BookOpen, Users, FileText, Library } from 'lucide-react';
 import api from '../../services/api';
+import { Skeleton } from '../../components/Skeleton';
 import styles from './Dashboard.module.css';
 
 interface DashboardData {
@@ -43,7 +44,25 @@ export const Dashboard: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className={styles.loading}>Carregando painel...</div>;
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <Skeleton height="36px" width="260px" />
+          <Skeleton height="20px" width="380px" style={{ marginTop: '10px' }} />
+        </div>
+        <div className={styles.grid}>
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className={`glass-panel ${styles.card}`}>
+              <Skeleton width="64px" height="64px" borderRadius="12px" />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <Skeleton height="13px" width="60%" />
+                <Skeleton height="30px" width="40%" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
