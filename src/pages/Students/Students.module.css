@@ -1,0 +1,103 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.header p {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  min-height: 300px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th, .table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.titleCell {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.badgeSuccess {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.badgeWarning {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.badgeDanger {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.emptyState, .loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 0;
+  color: var(--text-muted);
+}
+
+.printArea {
+  display: none;
+}
+
+/* Print Specific Styles */
+@media print {
+  .hideOnPrint {
+    display: none !important;
+  }
+  
+  .printArea {
+    display: flex !important;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+}
