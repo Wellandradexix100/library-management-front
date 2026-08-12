@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+# 📚 Library Management - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface de usuário (SPA) do Sistema de Gerenciamento de Biblioteca, construída com **React**, **Vite** e **TypeScript**.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologias
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React (v19)**
+- **Vite** (Build tool de alta performance)
+- **TypeScript** (Tipagem estática)
+- **React Router DOM** (Roteamento de páginas)
+- **Axios** (Comunicação HTTP com a API REST)
+- **Lucide React** (Ícones minimalistas e consistentes)
+- **React Barcode & React QR Code** (Geração de códigos para identificação dos livros)
 
-## React Compiler
+## 📦 Como Executar Localmente
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Pré-requisitos
+- Node.js (v18+)
+- Backend ([Library Management API](../library-management-api)) rodando localmente para consumo de dados.
 
-## Expanding the ESLint configuration
+### Passos
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Instale as dependências do projeto:
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
 ```
+
+3. Acesse a aplicação no seu navegador (por padrão em `http://localhost:5173`).
+
+## ⚙️ Scripts Disponíveis
+
+- `npm run dev`: Inicia o servidor de desenvolvimento local.
+- `npm run build`: Compila o TypeScript e faz o build otimizado para produção.
+- `npm run lint`: Executa a verificação de código usando ESLint.
+- `npm run preview`: Inicia um servidor local focado em visualizar o build de produção gerado.
+
+## 🏗️ Estrutura e Padrões
+
+- Arquitetura focada na separação de componentes visuais, integrações e contexto de estado.
+- Roteamento, formulários e chamadas assíncronas tipadas, espelhando os mesmos contratos e esquemas (`Zod`) definidos na API do back-end.
+
+---
+Este é um subprojeto que faz parte do repositório principal do Sistema de Gerenciamento de Biblioteca Full-Stack.
